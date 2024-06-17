@@ -1,0 +1,8 @@
+﻿services:
+  TodoListService:
+    image: todolistservice
+    build:
+      context: .
+      dockerfile: ToDoListService/Dockerfile
+    ports:
+      - 8080:8080
