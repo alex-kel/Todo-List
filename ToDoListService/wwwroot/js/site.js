@@ -31,7 +31,6 @@ function updateItem(id, name, isComplete) {
 }
 
 function addItem() {
-    console.log(document.getElementById("todoInput"))
     const itemName = document.getElementById("todoInput").value;
 
     const item = {
@@ -47,12 +46,19 @@ function addItem() {
         },
         body: JSON.stringify(item)
     })
-        .then(response => response.json())
+        .then(async response => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                const body = await response.json();
+                throw new Error(body);
+            }
+        })
         .then(response => {
             renderElement(response);
             document.getElementById("todoInput").value = "";
         })
-        .catch(error => console.error('Unable to add item.', error));
+        .catch(error => alert('Unable to add item. ' + error.message));
 }
 
 function renderElement(todoItem) {

@@ -1,4 +1,4 @@
-namespace ToDoListService.Dtos;
+namespace ToDoListService.DTOs;
 
 public class TodoItemDto
 {

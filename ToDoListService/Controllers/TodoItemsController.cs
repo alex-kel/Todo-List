@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using ToDoListService.Models;
-using ToDoListService.Dtos;
+using ToDoListService.DTOs;
 using ToDoListService.Mappers;
 
 namespace ToDoListService.Controllers
@@ -37,7 +38,7 @@ namespace ToDoListService.Controllers
         [HttpPut("{id:long}")]
         public async Task<ActionResult<TodoItemDto>> PutTodoItem(long id, TodoItemDto todoItemDto)
         {
-            if (id != todoItemDto.Id)
+            if (id != todoItemDto.Id || todoItemDto.Name.IsNullOrEmpty())
             {
                 return BadRequest();
             }
@@ -75,6 +76,10 @@ namespace ToDoListService.Controllers
         [HttpPost]
         public async Task<ActionResult<TodoItemDto>> PostTodoItem(TodoItemDto todoItemDto)
         {
+            if (todoItemDto.Name.IsNullOrEmpty())
+            {
+                return BadRequest("Name cannot be null or empty");
+            }
             var todoItem = new TodoItem
             {
                 Name = todoItemDto.Name,
