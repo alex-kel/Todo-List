@@ -86,14 +86,14 @@ function renderElement(todoItem) {
     const txt = document.createTextNode("\u00D7");
     span.className = "close";
     span.appendChild(txt);
-    span.onclick = function () {
+    span.onclick = function (event) {
+        event.stopPropagation();
         deleteItem(todoItemId)
             .then(() => {
                 const div = this.parentElement;
                 div.style.display = "none";
             })
             .catch(error => console.error('Unable to delete item.', error));
-
     }
     li.appendChild(span);
 }
