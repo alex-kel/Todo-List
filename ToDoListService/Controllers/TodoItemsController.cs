@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 using ToDoListService.Models;
 using ToDoListService.DTOs;
 using ToDoListService.Mappers;
@@ -34,10 +33,6 @@ namespace ToDoListService.Controllers
         [HttpPost]
         public async Task<ActionResult<TodoItemDto>> PostTodoItem(TodoItemDto todoItemDto, CancellationToken cancellationToken)
         {
-            if (todoItemDto.Name.IsNullOrEmpty())
-            {
-                return BadRequest("Name cannot be null or empty");
-            }
             var todoItem = new TodoItem
             {
                 Name = todoItemDto.Name,
@@ -54,15 +49,10 @@ namespace ToDoListService.Controllers
         [HttpPut("{id:long}")]
         public async Task<ActionResult<TodoItemDto>> PutTodoItemAsync(long id, TodoItemDto todoItemDto, CancellationToken cancellationToken)
         {
-            if (id != todoItemDto.Id || todoItemDto.Name.IsNullOrEmpty())
-            {
-                return BadRequest("Request validation failed");
-            }
-
             var todoItem = TodoItemMapper.ToTodoItem(todoItemDto);
-            await unitOfWork.TodoItems.UpdateAsync(todoItem, cancellationToken);
+            var isUpdated = await unitOfWork.TodoItems.UpdateAsync(todoItem, cancellationToken);
+            if (!isUpdated) return BadRequest();
             await unitOfWork.SaveChangesAsync(cancellationToken);
-
             return CreatedAtAction(nameof(GetTodoItemAsync), new { id = todoItem.Id },
                 TodoItemMapper.ToTodoItemDto(todoItem));
         }

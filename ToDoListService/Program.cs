@@ -5,6 +5,8 @@ using ToDoListService.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddHttpContextAccessor();
+
 // Add services to the container.
 builder.Services.AddControllers(options => { options.SuppressAsyncSuffixInActionNames = false; });
 builder.Services.AddDbContext<TodoContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("TodoContext")));
