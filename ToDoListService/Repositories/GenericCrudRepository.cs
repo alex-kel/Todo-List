@@ -4,7 +4,8 @@ using ToDoListService.Repositories.Interfaces;
 
 namespace ToDoListService.Repositories;
 
-public abstract class GenericCrudRepository<T>(TodoContext context, ILogger<GenericCrudRepository<T>> logger) : ICrudRepository<T> where T : class
+public abstract class GenericCrudRepository<T>(TodoContext context, ILogger<GenericCrudRepository<T>> logger)
+    : ICrudRepository<T> where T : class
 {
     protected readonly DbSet<T> DbSet = context.Set<T>();
     
@@ -17,7 +18,7 @@ public abstract class GenericCrudRepository<T>(TodoContext context, ILogger<Gene
     {
         try
         {
-            return await DbSet.FindAsync(id, cancellationToken);
+            return await DbSet.FindAsync(new object?[] { id }, cancellationToken);
         }
         catch (Exception e)
         {
@@ -45,7 +46,7 @@ public abstract class GenericCrudRepository<T>(TodoContext context, ILogger<Gene
 
     public virtual async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken)
     {
-        var entity = await DbSet.FindAsync(id, cancellationToken);
+        var entity = await DbSet.FindAsync(new object?[] { id }, cancellationToken);
         if (entity != null)
         {
             DbSet.Remove(entity);

@@ -26,11 +26,11 @@ public class MatchesRouteValueAttribute : ValidationAttribute
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
     {
         var httpContextAccessor = validationContext.GetRequiredService<IHttpContextAccessor>();
-        var routeValues = httpContextAccessor.HttpContext?.Request.RouteValues;
-        var controller = routeValues?["controller"];
-        var action = routeValues?["action"];
-        var idFromRoute = routeValues?[RouteFieldName];
-        if (!ControllerName.Equals(controller) || !ActionName.Equals(action) || idFromRoute == null)
+        var routeValuesDict = httpContextAccessor.HttpContext?.Request.RouteValues;
+        var controllerName = routeValuesDict?["controller"]?.ToString();
+        var actionName = routeValuesDict?["action"]?.ToString();
+        var idFromRoute = routeValuesDict?[RouteFieldName]?.ToString();
+        if (!ControllerName.Equals(controllerName) || !ActionName.Equals(actionName) || idFromRoute == null)
             return ValidationResult.Success;
         if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
             return new ValidationResult($"{validationContext.DisplayName} is required.");
