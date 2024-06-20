@@ -14,4 +14,14 @@ public static class TodoItemMapper
             IsComplete = todoItem.IsComplete
         };
     }
+
+    public static TodoItem ToTodoItem(TodoItemDto todoItemDto)
+    {
+        return new TodoItem()
+        {
+            Id = todoItemDto.Id,
+            Name = todoItemDto.Name,
+            IsComplete = todoItemDto.IsComplete
+        };
+    }
 }
