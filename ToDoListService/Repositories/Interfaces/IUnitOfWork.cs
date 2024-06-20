@@ -6,5 +6,5 @@ public interface IUnitOfWork
 {
     ITodoItemRepository TodoItems { get; }
 
-    public Task SaveChangesAsync();
+    public Task SaveChangesAsync(CancellationToken cancellationToken);
 }

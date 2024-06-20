@@ -8,16 +8,16 @@ public abstract class GenericCrudRepository<T>(TodoContext context, ILogger<Gene
 {
     protected readonly DbSet<T> DbSet = context.Set<T>();
     
-    public virtual async Task<IEnumerable<T>> GetAllAsync()
+    public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken)
     {
-        return await DbSet.ToListAsync();
+        return await DbSet.ToListAsync(cancellationToken);
     }
 
-    public virtual async Task<T?> GetAsync(long id)
+    public virtual async Task<T?> GetAsync(long id, CancellationToken cancellationToken)
     {
         try
         {
-            return await DbSet.FindAsync(id);
+            return await DbSet.FindAsync(id, cancellationToken);
         }
         catch (Exception e)
         {
@@ -26,11 +26,11 @@ public abstract class GenericCrudRepository<T>(TodoContext context, ILogger<Gene
         }
     }
 
-    public virtual async Task<bool> CreateAsync(T entity)
+    public virtual async Task<bool> CreateAsync(T entity, CancellationToken cancellationToken)
     {
         try
         {
-            await DbSet.AddAsync(entity);
+            await DbSet.AddAsync(entity, cancellationToken);
             return true;
         }
         catch (Exception e)
@@ -41,11 +41,11 @@ public abstract class GenericCrudRepository<T>(TodoContext context, ILogger<Gene
     }
 
     // This needs to be implemented in Entity specific repository.
-    public abstract Task<bool> UpdateAsync(T entity);
+    public abstract Task<bool> UpdateAsync(T entity, CancellationToken cancellationToken);
 
-    public virtual async Task<bool> DeleteAsync(long id)
+    public virtual async Task<bool> DeleteAsync(long id, CancellationToken cancellationToken)
     {
-        var entity = await DbSet.FindAsync(id);
+        var entity = await DbSet.FindAsync(id, cancellationToken);
         if (entity != null)
         {
             DbSet.Remove(entity);

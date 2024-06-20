@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using ToDoListService.Models;
 using ToDoListService.DTOs;
@@ -14,17 +13,17 @@ namespace ToDoListService.Controllers
     {
         // GET: api/TodoItems
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItemsAsync()
+        public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItemsAsync(CancellationToken cancellationToken)
         {
-            var todoItems = await unitOfWork.TodoItems.GetAllAsync();
+            var todoItems = await unitOfWork.TodoItems.GetAllAsync(cancellationToken);
             return Ok(todoItems.Select(TodoItemMapper.ToTodoItemDto));
         }
 
         // GET: api/TodoItems/5
         [HttpGet("{id:long}")]
-        public async Task<ActionResult<TodoItemDto>> GetTodoItemAsync(long id)
+        public async Task<ActionResult<TodoItemDto>> GetTodoItemAsync(long id, CancellationToken cancellationToken)
         {
-            var todoItem = await unitOfWork.TodoItems.GetAsync(id);
+            var todoItem = await unitOfWork.TodoItems.GetAsync(id, cancellationToken);
 
             if (todoItem == null) return NotFound();
 
@@ -33,7 +32,7 @@ namespace ToDoListService.Controllers
 
         // POST: api/TodoItems
         [HttpPost]
-        public async Task<ActionResult<TodoItemDto>> PostTodoItem(TodoItemDto todoItemDto)
+        public async Task<ActionResult<TodoItemDto>> PostTodoItem(TodoItemDto todoItemDto, CancellationToken cancellationToken)
         {
             if (todoItemDto.Name.IsNullOrEmpty())
             {
@@ -44,8 +43,8 @@ namespace ToDoListService.Controllers
                 Name = todoItemDto.Name,
                 IsComplete = todoItemDto.IsComplete
             };
-            await unitOfWork.TodoItems.CreateAsync(todoItem);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.TodoItems.CreateAsync(todoItem, cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return CreatedAtAction(nameof(GetTodoItemAsync), new { id = todoItem.Id },
                 TodoItemMapper.ToTodoItemDto(todoItem));
@@ -53,7 +52,7 @@ namespace ToDoListService.Controllers
         
         // PUT: api/TodoItems/5
         [HttpPut("{id:long}")]
-        public async Task<ActionResult<TodoItemDto>> PutTodoItemAsync(long id, TodoItemDto todoItemDto)
+        public async Task<ActionResult<TodoItemDto>> PutTodoItemAsync(long id, TodoItemDto todoItemDto, CancellationToken cancellationToken)
         {
             if (id != todoItemDto.Id || todoItemDto.Name.IsNullOrEmpty())
             {
@@ -61,8 +60,8 @@ namespace ToDoListService.Controllers
             }
 
             var todoItem = TodoItemMapper.ToTodoItem(todoItemDto);
-            await unitOfWork.TodoItems.UpdateAsync(todoItem);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.TodoItems.UpdateAsync(todoItem, cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return CreatedAtAction(nameof(GetTodoItemAsync), new { id = todoItem.Id },
                 TodoItemMapper.ToTodoItemDto(todoItem));
@@ -70,16 +69,16 @@ namespace ToDoListService.Controllers
 
         // DELETE: api/TodoItems/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTodoItem(long id)
+        public async Task<IActionResult> DeleteTodoItem(long id, CancellationToken cancellationToken)
         {
-            var todoItem = await unitOfWork.TodoItems.GetAsync(id);
+            var todoItem = await unitOfWork.TodoItems.GetAsync(id, cancellationToken);
             if (todoItem == null)
             {
                 return NotFound();
             }
 
-            await unitOfWork.TodoItems.DeleteAsync(id);
-            await unitOfWork.SaveChangesAsync();
+            await unitOfWork.TodoItems.DeleteAsync(id, cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return NoContent();
         }

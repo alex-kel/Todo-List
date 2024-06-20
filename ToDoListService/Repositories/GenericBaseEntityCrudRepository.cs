@@ -8,15 +8,15 @@ public abstract class GenericBaseEntityCrudRepository<T>(TodoContext context, IL
 {
     private readonly TodoContext _context = context;
 
-    public override async Task<bool> CreateAsync(T entity)
+    public override async Task<bool> CreateAsync(T entity, CancellationToken cancellationToken)
     {
         entity.CreatedAt = DateTime.Now;
-        return await base.CreateAsync(entity);
+        return await base.CreateAsync(entity, cancellationToken);
     }
 
-    public override async Task<bool> UpdateAsync(T entity)
+    public override async Task<bool> UpdateAsync(T entity, CancellationToken cancellationToken)
     {
-        var persistedEntity = await GetAsync(entity.Id);
+        var persistedEntity = await GetAsync(entity.Id, cancellationToken);
 
         if (persistedEntity == null)
         {

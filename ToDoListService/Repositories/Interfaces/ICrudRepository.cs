@@ -2,13 +2,13 @@ namespace ToDoListService.Repositories.Interfaces;
 
 public interface ICrudRepository<T> where T : class
 {
-    public Task<IEnumerable<T>> GetAllAsync();
+    public Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken);
     
-    public Task<T?> GetAsync(long id);
+    public Task<T?> GetAsync(long id, CancellationToken cancellationToken);
     
-    public Task<bool> CreateAsync(T entity);
+    public Task<bool> CreateAsync(T entity, CancellationToken cancellationToken);
     
-    public Task<bool> UpdateAsync(T entity);
+    public Task<bool> UpdateAsync(T entity, CancellationToken cancellationToken);
     
-    public Task<bool> DeleteAsync(long id); 
+    public Task<bool> DeleteAsync(long id, CancellationToken cancellationToken); 
 }

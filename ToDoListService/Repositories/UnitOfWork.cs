@@ -7,9 +7,9 @@ public sealed class UnitOfWork(TodoContext context, ITodoItemRepository todoItem
 {
     public ITodoItemRepository TodoItems { get; } = todoItems;
 
-    public async Task SaveChangesAsync()
+    public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {
-        await context.SaveChangesAsync();
+        await context.SaveChangesAsync(cancellationToken);
     }
 
     public void Dispose()
