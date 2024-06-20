@@ -1,23 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace ToDoListService.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTodoItems : Migration
+    public partial class Initialization : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateSequence(
+                name: "TodoItemIdSequence",
+                incrementBy: 100);
+
             migrationBuilder.CreateTable(
                 name: "TodoItems",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<long>(type: "bigint", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsComplete = table.Column<bool>(type: "bit", nullable: false)
+                    IsComplete = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdateAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -30,6 +36,9 @@ namespace ToDoListService.Migrations
         {
             migrationBuilder.DropTable(
                 name: "TodoItems");
+
+            migrationBuilder.DropSequence(
+                name: "TodoItemIdSequence");
         }
     }
 }

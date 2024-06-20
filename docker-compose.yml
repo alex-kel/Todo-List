@@ -4,13 +4,13 @@ volumes:
   sqlserver_data:
 
 services:
-  api:
-    image: todolistservice
-    build:
-      context: .
-      dockerfile: ToDoListService/Dockerfile
-    ports:
-      - '8080:8080'
+#  api:
+#    image: todolistservice
+#    build:
+#      context: .
+#      dockerfile: ToDoListService/Dockerfile
+#    ports:
+#      - '8080:8080'
   
   sql-server:
     image: mcr.microsoft.com/mssql/server:2022-latest
