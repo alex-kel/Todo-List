@@ -21,7 +21,9 @@ public static class TodoItemMapper
         {
             Id = todoItemDto.Id,
             Name = todoItemDto.Name,
-            IsComplete = todoItemDto.IsComplete
+            IsComplete = todoItemDto.IsComplete,
+            CreatedAt = null,
+            UpdateAt = null
         };
     }
 }

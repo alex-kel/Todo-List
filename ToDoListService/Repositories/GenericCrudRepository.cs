@@ -6,7 +6,7 @@ namespace ToDoListService.Repositories;
 
 public abstract class GenericCrudRepository<T>(TodoContext context, ILogger<GenericCrudRepository<T>> logger) : ICrudRepository<T> where T : class
 {
-    protected DbSet<T> DbSet = context.Set<T>();
+    protected readonly DbSet<T> DbSet = context.Set<T>();
     
     public virtual async Task<IEnumerable<T>> GetAllAsync()
     {
