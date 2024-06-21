@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using ToDoListService.Data;
 using ToDoListService.Data.Interfaces;
+using ToDoListService.Middlewares;
 using ToDoListService.Repositories;
 using ToDoListService.Repositories.Interfaces;
 
@@ -31,5 +32,8 @@ app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 app.MapControllers();
+
+app.UseErrorResponseDecoration();
+app.UseElapsedResponseTimeHeader();
 
 app.Run();
