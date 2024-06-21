@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ToDoListService.Data.Interfaces;
 using ToDoListService.Models;
 using ToDoListService.DTOs;
 using ToDoListService.Mappers;
@@ -8,13 +9,16 @@ namespace ToDoListService.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TodoItemsController(IUnitOfWork unitOfWork) : ControllerBase
+public class TodoItemsController(
+    IUnitOfWork unitOfWork,
+    ITodoItemRepository todoItemRepository
+) : ControllerBase
 {
     // GET: api/TodoItems
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItemsAsync(CancellationToken cancellationToken)
     {
-        var todoItems = await unitOfWork.TodoItems.GetAllAsync(cancellationToken);
+        var todoItems = await todoItemRepository.GetAllAsync(cancellationToken);
         return Ok(todoItems.Select(TodoItemMapper.ToTodoItemDto));
     }
 
@@ -22,7 +26,7 @@ public class TodoItemsController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpGet("{id:long}")]
     public async Task<ActionResult<TodoItemDto>> GetTodoItemAsync(long id, CancellationToken cancellationToken)
     {
-        var todoItem = await unitOfWork.TodoItems.GetAsync(id, cancellationToken);
+        var todoItem = await todoItemRepository.GetAsync(id, cancellationToken);
 
         if (todoItem == null) return NotFound();
 
@@ -38,7 +42,7 @@ public class TodoItemsController(IUnitOfWork unitOfWork) : ControllerBase
             Name = todoItemDto.Name,
             IsComplete = todoItemDto.IsComplete
         };
-        await unitOfWork.TodoItems.CreateAsync(todoItem, cancellationToken);
+        await todoItemRepository.CreateAsync(todoItem, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return CreatedAtAction(nameof(GetTodoItemAsync), new { id = todoItem.Id },
@@ -50,7 +54,7 @@ public class TodoItemsController(IUnitOfWork unitOfWork) : ControllerBase
     public async Task<ActionResult<TodoItemDto>> PutTodoItemAsync(long id, TodoItemDto todoItemDto, CancellationToken cancellationToken)
     {
         var todoItem = TodoItemMapper.ToTodoItem(todoItemDto);
-        var isUpdated = await unitOfWork.TodoItems.UpdateAsync(todoItem, cancellationToken);
+        var isUpdated = await todoItemRepository.UpdateAsync(todoItem, cancellationToken);
         if (!isUpdated) return BadRequest();
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return CreatedAtAction(nameof(GetTodoItemAsync), new { id = todoItem.Id },
@@ -61,13 +65,13 @@ public class TodoItemsController(IUnitOfWork unitOfWork) : ControllerBase
     [HttpDelete("{id:long}")]
     public async Task<IActionResult> DeleteTodoItem(long id, CancellationToken cancellationToken)
     {
-        var todoItem = await unitOfWork.TodoItems.GetAsync(id, cancellationToken);
+        var todoItem = await todoItemRepository.GetAsync(id, cancellationToken);
         if (todoItem == null)
         {
             return NotFound();
         }
 
-        await unitOfWork.TodoItems.DeleteAsync(id, cancellationToken);
+        await todoItemRepository.DeleteAsync(id, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return NoContent();

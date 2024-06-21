@@ -1,11 +1,10 @@
-using ToDoListService.Data;
+using ToDoListService.Data.Interfaces;
 using ToDoListService.Repositories.Interfaces;
 
-namespace ToDoListService.Repositories;
+namespace ToDoListService.Data;
 
 public sealed class UnitOfWork(TodoContext context, ITodoItemRepository todoItems) : IUnitOfWork, IDisposable
 {
-    public ITodoItemRepository TodoItems { get; } = todoItems;
 
     public async Task SaveChangesAsync(CancellationToken cancellationToken)
     {

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ToDoListService.Data;
+using ToDoListService.Data.Interfaces;
 using ToDoListService.Repositories;
 using ToDoListService.Repositories.Interfaces;
 
