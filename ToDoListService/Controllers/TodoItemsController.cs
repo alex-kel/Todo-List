@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using NLog;
 using ToDoListService.Data.Interfaces;
 using ToDoListService.Models;
 using ToDoListService.DTOs;
@@ -14,6 +15,8 @@ public class TodoItemsController(
     ITodoItemRepository todoItemRepository
 ) : ControllerBase
 {
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    
     // GET: api/TodoItems
     [HttpGet]
     public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItemsAsync(CancellationToken cancellationToken)
@@ -65,15 +68,16 @@ public class TodoItemsController(
     [HttpDelete("{id:long}")]
     public async Task<IActionResult> DeleteTodoItem(long id, CancellationToken cancellationToken)
     {
-        var todoItem = await todoItemRepository.GetAsync(id, cancellationToken);
-        if (todoItem == null)
-        {
-            return NotFound();
-        }
-
         await todoItemRepository.DeleteAsync(id, cancellationToken);
         await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return NoContent();
+    }
+
+    [HttpPatch("{id:long}")]
+    public Task<IActionResult> PatchTodoItem(long id, CancellationToken token)
+    {
+        _logger.Error("Someone tried to patch the Todo Item Entity!");
+        return Task.FromResult<IActionResult>(BadRequest("Patch http method is not supported!"));
     }
 }
