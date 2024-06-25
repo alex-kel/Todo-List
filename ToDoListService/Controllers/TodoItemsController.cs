@@ -31,7 +31,10 @@ public class TodoItemsController(
     {
         var todoItem = await todoItemRepository.GetAsync(id, cancellationToken);
 
-        if (todoItem == null) return NotFound();
+        if (todoItem == null)
+        {
+            return NotFound();
+        }
 
         return TodoItemMapper.ToTodoItemDto(todoItem);
     }
@@ -58,7 +61,10 @@ public class TodoItemsController(
     {
         var todoItem = TodoItemMapper.ToTodoItem(todoItemDto);
         var isUpdated = await todoItemRepository.UpdateAsync(todoItem, cancellationToken);
-        if (!isUpdated) return BadRequest();
+        if (!isUpdated)
+        {
+            return BadRequest();
+        }
         await unitOfWork.SaveChangesAsync(cancellationToken);
         return CreatedAtAction(nameof(GetTodoItemAsync), new { id = todoItem.Id },
             TodoItemMapper.ToTodoItemDto(todoItem));
