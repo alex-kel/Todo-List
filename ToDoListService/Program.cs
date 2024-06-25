@@ -44,3 +44,5 @@ app.UseErrorResponseDecoration();
 app.UseElapsedResponseTimeHeader();
 
 app.Run();
+
+public partial class Program;
