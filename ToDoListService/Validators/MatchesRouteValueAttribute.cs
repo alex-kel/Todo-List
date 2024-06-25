@@ -31,9 +31,13 @@ public class MatchesRouteValueAttribute : ValidationAttribute
         var actionName = routeValuesDict?["action"]?.ToString();
         var idFromRoute = routeValuesDict?[RouteFieldName]?.ToString();
         if (!ControllerName.Equals(controllerName) || !ActionName.Equals(actionName) || idFromRoute == null)
+        {
             return ValidationResult.Success;
+        }
         if (value == null || string.IsNullOrWhiteSpace(value.ToString()))
+        {
             return new ValidationResult($"{validationContext.DisplayName} is required.");
+        }
 
         return !idFromRoute.Equals(value.ToString())
             ? new ValidationResult(FormatErrorMessage(validationContext.DisplayName))
