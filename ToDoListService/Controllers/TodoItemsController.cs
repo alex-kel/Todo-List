@@ -1,116 +1,89 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
+using NLog;
+using ToDoListService.Data.Interfaces;
 using ToDoListService.Models;
 using ToDoListService.DTOs;
 using ToDoListService.Mappers;
+using ToDoListService.Repositories.Interfaces;
 
-namespace ToDoListService.Controllers
+namespace ToDoListService.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class TodoItemsController(
+    IUnitOfWork unitOfWork,
+    ITodoItemRepository todoItemRepository
+) : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TodoItemsController(TodoContext context) : ControllerBase
+    private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
+    
+    // GET: api/TodoItems
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItemsAsync(CancellationToken cancellationToken)
     {
-        // GET: api/TodoItems
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<TodoItemDto>>> GetTodoItems()
+        var todoItems = await todoItemRepository.GetAllAsync(cancellationToken);
+        return Ok(todoItems.Select(TodoItemMapper.ToTodoItemDto));
+    }
+
+    // GET: api/TodoItems/5
+    [HttpGet("{id:long}")]
+    public async Task<ActionResult<TodoItemDto>> GetTodoItemAsync(long id, CancellationToken cancellationToken)
+    {
+        var todoItem = await todoItemRepository.GetAsync(id, cancellationToken);
+
+        if (todoItem == null)
         {
-            return await context.TodoItems
-                .Select(x => TodoItemMapper.ToTodoItemDto(x))
-                .ToListAsync();
+            return NotFound();
         }
 
-        // GET: api/TodoItems/5
-        [HttpGet("{id:long}")]
-        public async Task<ActionResult<TodoItemDto>> GetTodoItem(long id)
+        return TodoItemMapper.ToTodoItemDto(todoItem);
+    }
+
+    // POST: api/TodoItems
+    [HttpPost]
+    public async Task<ActionResult<TodoItemDto>> PostTodoItem(TodoItemDto todoItemDto, CancellationToken cancellationToken)
+    {
+        var todoItem = new TodoItem
         {
-            var todoItem = await context.TodoItems.FindAsync(id);
+            Name = todoItemDto.Name,
+            IsComplete = todoItemDto.IsComplete
+        };
+        await todoItemRepository.CreateAsync(todoItem, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            if (todoItem == null)
-            {
-                return NotFound();
-            }
-
-            return TodoItemMapper.ToTodoItemDto(todoItem);
-        }
-
-        // PUT: api/TodoItems/5
-        [HttpPut("{id:long}")]
-        public async Task<ActionResult<TodoItemDto>> PutTodoItem(long id, TodoItemDto todoItemDto)
+        return CreatedAtAction(nameof(GetTodoItemAsync), new { id = todoItem.Id },
+            TodoItemMapper.ToTodoItemDto(todoItem));
+    }
+        
+    // PUT: api/TodoItems/5
+    [HttpPut("{id:long}")]
+    public async Task<ActionResult<TodoItemDto>> PutTodoItemAsync(long id, TodoItemDto todoItemDto, CancellationToken cancellationToken)
+    {
+        var todoItem = TodoItemMapper.ToTodoItem(todoItemDto);
+        var isUpdated = await todoItemRepository.UpdateAsync(todoItem, cancellationToken);
+        if (!isUpdated)
         {
-            if (id != todoItemDto.Id || todoItemDto.Name.IsNullOrEmpty())
-            {
-                return BadRequest();
-            }
-            
-            var todoItem = await context.TodoItems.FindAsync(id);
-            if (todoItem == null)
-            {
-                return NotFound();
-            }
-
-            todoItem.Name = todoItemDto.Name;
-            todoItem.IsComplete = todoItemDto.IsComplete;
-            
-            try
-            {
-                await context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TodoItemExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id },
-                TodoItemMapper.ToTodoItemDto(todoItem));
+            return BadRequest();
         }
+        await unitOfWork.SaveChangesAsync(cancellationToken);
+        return CreatedAtAction(nameof(GetTodoItemAsync), new { id = todoItem.Id },
+            TodoItemMapper.ToTodoItemDto(todoItem));
+    }
 
-        // POST: api/TodoItems
-        [HttpPost]
-        public async Task<ActionResult<TodoItemDto>> PostTodoItem(TodoItemDto todoItemDto)
-        {
-            if (todoItemDto.Name.IsNullOrEmpty())
-            {
-                return BadRequest("Name cannot be null or empty");
-            }
-            var todoItem = new TodoItem
-            {
-                Name = todoItemDto.Name,
-                IsComplete = todoItemDto.IsComplete
-            };
-            context.TodoItems.Add(todoItem);
-            await context.SaveChangesAsync();
+    // DELETE: api/TodoItems/5
+    [HttpDelete("{id:long}")]
+    public async Task<IActionResult> DeleteTodoItem(long id, CancellationToken cancellationToken)
+    {
+        await todoItemRepository.DeleteAsync(id, cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
-            return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id },
-                TodoItemMapper.ToTodoItemDto(todoItem));
-        }
+        return NoContent();
+    }
 
-        // DELETE: api/TodoItems/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTodoItem(long id)
-        {
-            var todoItem = await context.TodoItems.FindAsync(id);
-            if (todoItem == null)
-            {
-                return NotFound();
-            }
-
-            context.TodoItems.Remove(todoItem);
-            await context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool TodoItemExists(long id)
-        {
-            return context.TodoItems.Any(e => e.Id == id);
-        }
+    [HttpPatch("{id:long}")]
+    public Task<IActionResult> PatchTodoItem(long id, CancellationToken token)
+    {
+        _logger.Error("Someone tried to patch the Todo Item Entity!");
+        return Task.FromResult<IActionResult>(BadRequest("Patch http method is not supported!"));
     }
 }
