@@ -40,6 +40,20 @@ public abstract class GenericCrudRepository<T>(TodoContext context, ILogger<Gene
             return false;
         }
     }
+    
+    public virtual bool Create(T entity)
+    {
+        try
+        {
+            DbSet.Add(entity);
+            return true;
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Failed to create an entity");
+            return false;
+        }
+    }
 
     // This needs to be implemented in Entity specific repository.
     public abstract Task<bool> UpdateAsync(T entity, CancellationToken cancellationToken);

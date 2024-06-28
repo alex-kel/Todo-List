@@ -10,6 +10,11 @@ public sealed class UnitOfWork(TodoContext context, ITodoItemRepository todoItem
     {
         await context.SaveChangesAsync(cancellationToken);
     }
+    
+    public void SaveChanges()
+    { 
+        context.SaveChanges();
+    }
 
     public void Dispose()
     {

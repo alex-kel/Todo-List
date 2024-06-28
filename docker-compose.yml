@@ -11,7 +11,10 @@ services:
 #      dockerfile: ToDoListService/Dockerfile
 #    ports:
 #      - '8080:8080'
-  
+  rabbitmq:
+    image: rabbitmq:3
+    ports:
+      - '5672:5672'
   sql-server:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -37,4 +40,4 @@ services:
     command:
       - "/bin/bash"
       - "-c"
-      - "/opt/mssql-tools/bin/sqlcmd -S sql-server -P Passw0rd!23 -U sa -d master -i docker-entrypoint-initdb.d/init.sql"
+      - "/opt/mssql-tools/bin/sqlcmd -S sql-server -P Passw0rd!23 -U sa -d master -v dir=/docker-entrypoint-initdb.d -i docker-entrypoint-initdb.d/init.sql"

@@ -7,6 +7,8 @@ public interface ICrudRepository<T> where T : class
     public Task<T?> GetAsync(long id, CancellationToken cancellationToken);
     
     public Task<bool> CreateAsync(T entity, CancellationToken cancellationToken);
+
+    public bool Create(T entity);
     
     public Task<bool> UpdateAsync(T entity, CancellationToken cancellationToken);
     

@@ -1,7 +1,13 @@
+using Hangfire;
+using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using NLog.Web;
+using ToDoListService.Configurations;
+using ToDoListService.Consumers;
 using ToDoListService.Data;
 using ToDoListService.Data.Interfaces;
+using ToDoListService.Jobs;
+using ToDoListService.Jobs.Interfaces;
 using ToDoListService.Middlewares;
 using ToDoListService.Repositories;
 using ToDoListService.Repositories.Interfaces;
@@ -15,6 +21,29 @@ builder.Services.AddControllers(options => { options.SuppressAsyncSuffixInAction
 builder.Services.AddDbContext<TodoContext>(opt => opt.UseSqlServer(builder.Configuration.GetConnectionString("TodoContext")));
 builder.Services.AddScoped<ITodoItemRepository, TodoItemRepository>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddSingleton<ITodoItemsGenerationJob, TodoItemGenerationJob>();
+
+// Jobs
+builder.Services.AddHangfire(configuration => configuration
+    .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+    .UseSimpleAssemblyNameTypeSerializer()
+    .UseRecommendedSerializerSettings()
+    .UseSqlServerStorage(builder.Configuration.GetConnectionString("HangfireConnection"))
+);
+builder.Services.AddHangfireServer();
+
+// MassTransit
+builder.Services.AddMassTransit(configuration =>
+    {
+        configuration.AddConsumer<TodoItemsConsumer>();
+        configuration.UsingRabbitMq((context, cfg) =>
+        {
+            var rabbitmqSettings = builder.Configuration.GetSection("RabbitMQ").Get<RabbitmqSettings>();
+            cfg.Host(rabbitmqSettings.Host, "/");
+            cfg.ConfigureEndpoints(context);
+        });
+    }
+);
 
 // NLog
 builder.Logging.ClearProviders();
@@ -32,6 +61,7 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseHangfireDashboard();
 }
 
 app.UseDefaultFiles();
@@ -42,6 +72,9 @@ app.MapControllers();
 
 app.UseErrorResponseDecoration();
 app.UseElapsedResponseTimeHeader();
+
+RecurringJob.AddOrUpdate<ITodoItemsGenerationJob>("TODOS_GENERATOR",
+    job => job.RunAsync(app.Lifetime.ApplicationStopping), Cron.Minutely);
 
 app.Run();
 
